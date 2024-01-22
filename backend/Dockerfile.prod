@@ -1,0 +1,31 @@
+# Usa una imagen más ligera de Python para producción
+FROM python:3.8-slim
+
+# Instala pipenv globalmente (no se necesita en el PATH)
+RUN pip install pipenv
+
+# Configura el entorno para Pipenv
+ENV PIPENV_VENV_IN_PROJECT=1
+
+# Actualiza e instala las dependencias del sistema necesarias
+RUN apt-get update && \
+    apt-get install -y libgl1-mesa-glx && \
+    rm -rf /var/lib/apt/lists/*
+
+# Establece el directorio de trabajo
+WORKDIR /usr/src/app
+
+# Copia solo los archivos necesarios para la instalación de dependencias
+COPY Pipfile Pipfile.lock ./
+
+# Instala dependencias sin entorno de desarrollo
+RUN pipenv install --deploy --ignore-pipfile
+
+# Copia el resto de los archivos
+COPY . .
+
+# Expone el puerto
+EXPOSE 8000
+
+# Comando para ejecutar la aplicación
+CMD ["pipenv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

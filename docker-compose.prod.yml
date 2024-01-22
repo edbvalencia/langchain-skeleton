@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    stdin_open: false
+    tty: false
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    stdin_open: false
+    tty: false
+    ports:
+      - "5173:5173"
+
+  database:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: appdb
+    volumes:
+      - mongo-data:/data/db
+      #- mongo-logs:/var/log/mongodb
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongo-data:
+  #mongo-logs:
